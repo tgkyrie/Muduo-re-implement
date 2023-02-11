@@ -3,11 +3,11 @@
 ## 特点
 + 使用Epoll LT模式，非阻塞IO，实现主从Reactor模式
 + 封装条件变量+RAII风格锁解决生产者-消费者问题，实现线程池
-+ 改用最小堆结合Linux timefd 实现定时器管理,使用惰性删除实现O(1)时间取消定时任务,与原muduo红黑树定时器相比性能更好
++ 改用最小堆结合Linux timefd 实现定时器管理,使用懒惰删除实现O(1)时间取消定时任务,与原muduo红黑树定时器相比性能更好
 + 使用智能指针管理内存
-+ 使用元编程技术 SFINAE 实现 class any类代替原有代码中的boost::any类
++ 实现class Any类代替原有代码中的boost::any类,实现的Any类代码中使用了std::enable_if等元编程技术
 + 支持HTTP1.0\1.1,支持GET请求，新增POST请求
-+ 新增Json模块，使用LL1文法分析解析Json，使用模板元
++ 新增Json模块，使用LL1文法分析解析Json，使用模板元技术和变参模板实现get和set的多态.
 + 改用链式数组实现Buffer(待实现)
 
 
@@ -187,8 +187,84 @@ linux内核提供timerfd接口，把定时器事件作为一个文件处理，�
 
 删除操作，如果要删除指定定时任务，需要遍历所有任务，这在定时任务量多的时候开销特别大，对比以下$10^6$和$log10^6=6log10$，差距很大
 
-为了解决这个问题，可以采用惰性删除，即在定时任务类中设置一个Bool变量标志该任务是否被删除。在取消任务的时候，设置这个标志即可
+为了解决这个问题，可以采用懒惰删除，即在定时任务类中设置一个Bool变量标志该任务是否被删除。在取消任务的时候，设置这个标志即可
 
 定时器管理结构TimerQueue在遍历超时任务的时候会查看这个标志，如果已取消了，那么就不再执行，并且后续将进行析构，不再插入回最小堆中
 
-## TO BE CONTINUED
+## Any类
+
+### 为什么需要Any类
+典型的例子就是HttpServer,在解析一个客户端链接的Http请求的时候，Http报文可能不完整，需要保存当前解析的状态，而对于不同的应用，其状态的数据类型不一样(Http中是HttpContent),所以需要一个Any类来存储任意类型的数据
+
+### 如何实现
+可以使用void* 类型指针，但他不能保证类型安全
+
+也可以用模板
+```cpp
+template<typename T>
+class Any{
+    T data_;
+};
+```
+这样可以实现
+```cpp
+Any<int> a=1;
+Any<string> b="string";
+```
+这其实没什么用，Any类的目标是支持下面这种用法
+```cpp
+Any a=1;//或Any a(1);
+Any b="string";
+int c=a;
+string d=a; //error
+```
+
+那么有什么办法呢,可以再封装一层
+```cpp
+class Any{
+    template<typename T>
+    class DataType{
+        T data_;
+    };
+    DataType<T>* ptr_;
+};
+```
+但这个还不行,没办法在构造的时候知道ptr_的类型,因为它是模板类型的指针,而Any类不是模板类，因此Any类中就不能有模板类型的成员变量
+
+但可以在Any中定义一个非模板的基类指针，让基类指针指向派生模板类DataType对象加上虚函数实现多态
+```cpp
+class Any{
+    class BaseType{
+    public
+        BaseType()=default;
+        virtual ~BaseType()=default;
+    }
+    template<typename T>
+    class DataType:public BaseType
+    {
+        template<typename T>
+        DataType(const T&);
+        template<typename T>
+        DataType(T&&);
+        T data_;
+    };
+    BaseType* ptr_;
+    template<typename T>
+    operator=(T&& val){
+        delete ptr_;
+        ptr_=new DataType<T>(std::forward<T>(val));
+    }
+}
+```
+这样就可以实现Any类的目标了，剩下就是一些拷贝移动，内存管理，类型检查等内容，可以参考`muduo/base/Any.h`
+
+### 元编程
+元编程主要作用在于
++ 编译期计算，提高运行时速度
++ 提高类型安全
+  
+在实现的代码中使用了模板元`std::enable_if`,`std::decay`,`std::is_same`，主要用于类型安全，原理可以自行查阅资料
+
+
+
+
