@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAG = -O2 
+CXXFLAG = -O2 -std=c++17 -lpthread
 
 # SUBDIRS = $(shell ls -l |grep ^d | awk '{if($$9!="debug") print $$9}')
 SUBDIRS = muduo debug

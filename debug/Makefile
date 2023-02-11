@@ -7,5 +7,5 @@ ALLBIN=$(addprefix $(BIN_DIR)/,$(BIN))
 all:$(ALLBIN)
 	@echo "finish compile"
 $(BIN_DIR)/%:obj/%.o $(OBJS)
-	$(CXX) -o $@ $^
+	$(CXX) -o $@ $^ $(CXXFLAG)
 
