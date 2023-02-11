@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        html {
+            height: 100%;
+        }
+        body {
+            height: 100%;
+        }
+        .container {
+            height: 100%;
+            background-image: linear-gradient(to right, #fbc2eb, #a6c1ee);
+        }
+        .login-wrapper {
+            background-color: #fff;
+            width: 358px;
+            height: 588px;
+            border-radius: 15px;
+            padding: 0 50px;
+            position: relative;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .header {
+            font-size: 38px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 200px;
+        }
+        .input-item {
+            display: block;
+            width: 100%;
+            margin-bottom: 20px;
+            border: 0;
+            padding: 10px;
+            border-bottom: 1px solid rgb(128, 125, 125);
+            font-size: 15px;
+            outline: none;
+        }
+        .input-item:placeholder {
+            text-transform: uppercase;
+        }
+        .btn {
+            text-align: center;
+            padding: 10px;
+            width: 100%;
+            margin-top: 40px;
+            background-image: linear-gradient(to right, #a6c1ee, #fbc2eb);
+            color: #fff;
+        }
+        .msg {
+            text-align: center;
+            line-height: 88px;
+        }
+        a {
+            text-decoration-line: none;
+            color: #abc1ee;
+        }
+    </style>
+    <script src="http://cdn.bootcss.com/jquery/1.12.2/jquery.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery.serializeJSON/2.9.0/jquery.serializejson.js"></script>
+    <script type="text/javascript">
+        function login() {
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/loopback',
+                async:false,
+                cache:false,
+                contentType: "application/json",
+                data:JSON.stringify({
+                    "username": username,
+                    "password": password
+                }),
+                success: function (result) {
+                    console.log(typeof result);
+                    console.log("data is :" + result)
+                    if (result.code == 200) {
+                        alert("登陆成功");
+                        window.location.href = "./hello";
+                    }else {
+                        alert(result.message)
+                    }
+                }
+            });
+        }
+        function postData() {
+            // Default options are marked with *
+            var url="http://127.0.0.1:8000/loopback"
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+            const response = fetch("http://127.0.0.1:8000/loopback", {
+              method: 'POST', // *GET, POST, PUT, DELETE, etc.
+             // mode: 'same-origin', // no-cors, *cors, same-origin
+              //cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+              //credentials: 'same-origin', // include, *same-origin, omit
+              headers: {
+                'Content-Type': 'application/json;charset=UTF-8'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              //redirect: 'follow', // manual, *follow, error
+              //referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+              body: JSON.stringify({
+                "username": username,
+                "password": password
+              }) // body data type must match "Content-Type" header
+            });
+            return response; // parses JSON response into native JavaScript objects
+          }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="login-wrapper">
+            <div class="header">Login</div>
+            <div class="form-wrapper">
+            <!-- <form action="http://127.0.0.1:8000/loopback" method="post" enctype="application/json"> -->
+                <input type="text" name="username" id="username" placeholder="username" class="input-item">
+                <input type="password" name="password" id="password" placeholder="password" class="input-item">
+                <!-- <div class="btn"> -->
+                <input type="button" class="btn" value="Login" onclick="login()">    
+                <!-- </div> -->
+            <!-- </form> -->
+            </div>
+            <div class="msg">
+                Don't have account?
+                <a href="#">Sign up</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
