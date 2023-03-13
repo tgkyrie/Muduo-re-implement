@@ -5,7 +5,7 @@
 + 封装条件变量+RAII风格锁解决生产者-消费者问题，实现线程池
 + 改用最小堆结合Linux timefd 实现定时器管理,使用懒惰删除取消定时任务,与原muduo红黑树定时器相比性能更好
 + 使用智能指针管理内存
-+ 实现class Any类代替原有代码中的boost::any类,实现的Any类代码中使用了std::enable_if等元编程技术
++ 实现 class any类代替原有代码中的boost::any类,实现代码中使用了std::enable_if等元编程技术
 + 支持HTTP1.0\1.1,支持GET请求，新增POST请求
 + 新增Json模块，使用LL1文法分析解析Json，使用模板元技术和变参模板实现get和set的多态.
 + 改用链式数组实现Buffer(待实现)
