@@ -31,17 +31,20 @@ void Acceptor::listen(){
 void Acceptor::handleRead(){
     InetAddr peerAddr;
     //LOG_TRACE<<"acceptor::handleRead()\n";
+
     int connfd;
     int i=0;
-    while((connfd=acceptSocket_.accept(&peerAddr))>=0&&i<acceptPerEvent){
+    while((connfd=acceptSocket_.accept(&peerAddr))>=0){
+        // LOG_INFO<<++accNum<<"\n";
         if(newConnectionCallback_){
+            // LOG_INFO<<++cbNum<<"\n";
             newConnectionCallback_(connfd,peerAddr);
         }
         else{
             //LOG_TRACE<<"acceptor::handleRead() no newconncb\n";
             close(connfd);
         }
-        i++;
+        // i++;
     }
     if(connfd<0){
         if(errno==EMFILE){
@@ -49,6 +52,9 @@ void Acceptor::handleRead(){
             close(idlefd_);
             idlefd_=accept(acceptSocket_.fd(),nullptr,nullptr);
             close(idlefd_);
+        }
+        else if(errno!=EAGAIN&&errno!=EWOULDBLOCK){
+            LOG_INFO << "in Acceptor::handleRead ERR connfd<0 errno="<<errno<<"\n";
         }
     }
     // int connfd=acceptSocket_.accept(&peerAddr);

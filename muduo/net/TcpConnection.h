@@ -3,6 +3,7 @@
 #include"muduo/net/InetAddr.h"
 #include"muduo/net/Socket.h"
 #include"muduo/net/Channel.h"
+#include"muduo/net/File.h"
 #include"muduo/net/Callbacks.h"
 #include"muduo/base/noncopyable.h"
 #include"muduo/net/Buffer.h"
@@ -34,6 +35,9 @@ public:
     void setMessageCallback(const MessageCallback& cb){
         messageCallback_=cb;
     }
+    void setWriteCompleteCallback(const WriteCompleteCallback& cb){
+        writeCompleteCallback_=cb;
+    }
     string name()const {return name_;}
     EventLoop* loop()const {return loop_;}
     const InetAddr localAddr()const{return localAddr_;}
@@ -43,6 +47,9 @@ public:
     void send(const char* s);
     void send(const std::string& s);
     void send(const void* buf,size_t len);
+    // void sendFile(const std::string& fileName);
+    // void sendFile(const std::string& fileName,size_t fileSize);
+    void sendFile(const FilePtr& file);
 
     void shutdown();
 
@@ -61,6 +68,11 @@ private:
     State state_;
     EventLoop* loop_;
     bool reading_;
+    // bool fileSending_=false;
+    FilePtr file_;
+    // off_t fileOff_;
+    size_t fileWrote_;
+    // size_t fileSize_;
     string name_;
     std::unique_ptr<Socket> socket_;
     std::unique_ptr<Channel> sockChannel_;
@@ -86,6 +98,11 @@ private:
 
     void sendInLoopAsString(const std::string s);
     void sendInLoop(const void* buf,size_t len);
+
+    void sendFileInLoop(const FilePtr& file);
+    // void sendFileInLoop(const std::string& fileName);
+    // void sendFileInLoopWithSize(const std::string& fileName,size_t fileSize);
+
     void shutdownInLoop();
 
 };

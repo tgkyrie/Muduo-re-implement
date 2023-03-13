@@ -30,6 +30,9 @@ private:
     void onConnection(const TcpConnectionPtr& conn);
     void onMessage(const TcpConnectionPtr& conn,Buffer* buffer,Timestamp receivedTime);
     void onRequest(const TcpConnectionPtr& conn,const HttpRequest& request);
+    void closeConnection(const TcpConnectionPtr& conn);
+    // void sendFile(bool closeConn,const std::string& fileName,size_t fileSize,const TcpConnectionPtr& conn);
+    void sendFile(bool closeConn,const FilePtr& file,const TcpConnectionPtr& conn);
 };
 
 

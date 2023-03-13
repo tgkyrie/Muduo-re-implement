@@ -42,7 +42,9 @@ public:
         }
     }
     Any(Any&& that):dataPtr_(std::move(that.dataPtr_)){}
-    ~Any()=default;
+    ~Any(){
+        // LOG_INFO<<"destruct any\n";
+    }
     Any& operator=(const Any& that){
         if(that.dataPtr_){
             dataPtr_=that.dataPtr_->clone();

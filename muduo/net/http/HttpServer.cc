@@ -10,7 +10,7 @@ server_(loop,addr,name,reusePort)
 {
     server_.setConnectionCallback(std::bind(&HttpServer::onConnection,this,_1));
     server_.setMessageCallback(std::bind(&HttpServer::onMessage,this,_1,_2,_3));
-
+    // server_.setWriteCompleteCallback(std::bind(&HttpServer::writeComplete,this,_1));
 }
 void HttpServer::start(){
     server_.start();
@@ -45,8 +45,40 @@ void HttpServer::onRequest(const TcpConnectionPtr& conn,const HttpRequest& reque
     httpCallback_(request,&response);
     Buffer buf;
     response.appendToBuffer(&buf);
-    conn->send(&buf);
-    if(response.closeConnection()){
-        conn->shutdown();
+    // if(response.closeConnection()){
+    //     conn->setWriteCompleteCallback(std::bind(&HttpServer::writeComplete,this,response,_1));
+    // }
+    if(response.isSendFile()){
+        // conn->setWriteCompleteCallback(std::bind(&HttpServer::sendFile,this,response.closeConnection(),response.fileName(),response.bodySize(),_1));
+        conn->setWriteCompleteCallback(std::bind(&HttpServer::sendFile,this,response.closeConnection(),response.file(),_1));
     }
+    else if(response.closeConnection()){
+        conn->setWriteCompleteCallback(std::bind(&HttpServer::closeConnection,this,_1));
+    }
+    conn->send(&buf);
+    
+
+    // if(response.closeConnection()){
+    //     conn->shutdown();
+    // }
 }
+
+void HttpServer::closeConnection(const TcpConnectionPtr& conn){
+    // HttpContext& context=conn->getContext().cast<HttpContext>();
+    conn->shutdown();
+}
+void HttpServer::sendFile(bool closeConn,const FilePtr& file,const TcpConnectionPtr& conn){
+    if(closeConn){
+        conn->setWriteCompleteCallback(std::bind(&HttpServer::closeConnection,this,_1));
+    }
+    else conn->setWriteCompleteCallback(0);
+    conn->sendFile(file);
+}
+// void HttpServer::sendFile(bool closeConn,const std::string& fileName,size_t fileSize,const TcpConnectionPtr& conn){
+//     if(closeConn){
+//         conn->setWriteCompleteCallback(std::bind(&HttpServer::closeConnection,this,_1));
+//     }
+//     else conn->setWriteCompleteCallback(0);
+//     conn->sendFile(fileName,fileSize);
+
+// }

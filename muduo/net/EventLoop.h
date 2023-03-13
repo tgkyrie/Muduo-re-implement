@@ -55,7 +55,8 @@ public:
 
     //跨线程调用
     void runInLoop(Functor cb);
-    void queueInLoop(Functor cb);
+    void queueInLoop(Functor&& cb);
+    void queueInLoop(const Functor& cb);
 
     TimerId runAt(Timestamp time,TimerCallback cb);
     TimerId runAfter(double seconds,TimerCallback cb);

@@ -4,6 +4,7 @@
 #include<map>
 #include"muduo/base/copyable.h"
 #include"muduo/net/Buffer.h"
+#include"muduo/net/File.h"
 namespace muduo
 {
 namespace net
@@ -35,13 +36,25 @@ public:
     void setBody(const std::string& body){body_=body;}
     void appendToBuffer(Buffer* buffer);
     bool closeConnection()const {return closeConnection_;}
+    void sendFile(const std::string& fileName){
+        sendFile_=true;
+        file_=std::make_shared<File>(fileName);
+    }
+    bool isSendFile()const {return sendFile_;}
+    FilePtr file()const {return file_;}
+    // std::string fileName()const{return fileName_;}
+    // int bodySize()const {return bodySize_;}
 private:
     /* data */
     bool closeConnection_;
     HttpStatusCode statusCode_;
     std::string statusString_;
     std::map<std::string,std::string> header_;
-    std::string body_;
+    std::string body_="";
+    // std::string fileName_;
+    // size_t bodySize_;
+    bool sendFile_=false;
+    FilePtr file_;
 
 };
 

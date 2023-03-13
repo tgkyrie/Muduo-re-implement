@@ -126,8 +126,17 @@ void EventLoop::runInLoop(Functor cb){
         queueInLoop(std::move(cb));
     }
 }
+void EventLoop::queueInLoop(const Functor&cb){
+    {
+        MutexLockGuard lock(pendingFunctorsMutex_);
+        pendingFunctors_.push_back(std::move(cb));
+    }
+    if(!isInLoopThread()){
+        wakeup();
+    }
+}
 
-void EventLoop::queueInLoop(Functor cb){
+void EventLoop::queueInLoop(Functor&& cb){
     {
         MutexLockGuard lock(pendingFunctorsMutex_);
         pendingFunctors_.push_back(std::move(cb));

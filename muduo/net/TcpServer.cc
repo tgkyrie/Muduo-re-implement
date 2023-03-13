@@ -1,8 +1,9 @@
-#include<muduo/net/TcpServer.h>
+#include"muduo/net/TcpServer.h"
 #include<iostream>
 using namespace muduo;
 using namespace muduo::net;
 #include"muduo/base/Log.h"
+
 
 TcpServer::TcpServer(EventLoop* loop,const InetAddr& addr,const string& name,bool reusePort):
 loop_(loop),
@@ -42,6 +43,7 @@ void TcpServer::start(){
 
 //when acceptor.accept return ,run this
 void TcpServer::newConnection(int sockfd,const InetAddr& addr){
+    // LOG_INFO<<++connectNum<<"\n";
     loop_->assertInLoopThread();
     char buf[64];
     snprintf(buf,sizeof buf,"-%s#%d",addr.IpPort().c_str(),nextConnId_);
@@ -56,6 +58,7 @@ void TcpServer::newConnection(int sockfd,const InetAddr& addr){
     conn->setConnectionCallback(connCallback_);//设置链接建立回调
     conn->setCloseCallback(std::bind(&TcpServer::removeConnection,this,std::placeholders::_1));
     conn->setMessageCallback(messageCallback_);
+    conn->setWriteCompleteCallback(writeCompleteCallback_);
     //链接建立完成
     ioloop->runInLoop(std::bind(&TcpConnection::connectEstablished,conn.get()));
 }

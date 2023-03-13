@@ -94,7 +94,8 @@ void onRequest(const HttpRequest& req, HttpResponse* resp)
         resp->setStatusString("OK");
         resp->setContentType("text/html");
         resp->addHeader("Server", "Muduo");
-        resp->setBody(loadFile("html/login.html"));
+        // resp->setBody(loadFile("html/login.html"));
+        resp->sendFile("html/login.html");
     }
     else
     {
@@ -160,9 +161,9 @@ int main(int argc, char* argv[])
   }
   preLoadFile();
   EventLoop loop;
-  HttpServer server(&loop, InetAddr(port,false,true), "dummy",true);
+  HttpServer server(&loop, InetAddr(port,false,false), "dummy",true);
   server.setHttpCallback(onRequest);
-  server.setThreadNum(2);
+  server.setThreadNum(4);
   server.start();
   loop.loop();
 }

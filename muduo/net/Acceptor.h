@@ -30,6 +30,8 @@ private:
     Socket acceptSocket_;
     Channel acceptChannel_;
     int idlefd_;
+    int accNum=0;
+    int cbNum=0;
     NewConnectionCallback newConnectionCallback_;
 
 };

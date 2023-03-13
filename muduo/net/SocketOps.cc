@@ -60,7 +60,7 @@ int sockets::accept(int fd,struct sockaddr_in6* addr){
         case ENOTSOCK:
         case EOPNOTSUPP:
             // unexpected errors
-            // LOG_FATAL << "unexpected error of ::accept " << savedErrno;
+            // LOG_INFO << "unexpected error of ::accept " << savedErrno;
             break;
         default:
             // LOG_FATAL << "unknown error of ::accept " << savedErrno;
@@ -77,6 +77,6 @@ void sockets::close(int sockfd)
 {
     if (::close(sockfd) < 0)
     {
-        // LOG_SYSERR << "sockets::close";
+        LOG_DEBUG << "sockets::close";
     }
 }

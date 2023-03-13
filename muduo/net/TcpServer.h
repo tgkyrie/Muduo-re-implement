@@ -6,6 +6,8 @@
 #include"muduo/net/InetAddr.h"
 #include"muduo/net/TcpConnection.h"
 #include"muduo/base/Atomic.h"
+#include"muduo/net/File.h"
+
 #include"muduo/net/Callbacks.h"
 #include"muduo/net/EventLoopThreadPool.h"
 #include<map>
@@ -42,7 +44,9 @@ public:
     void setMessageCallback(const MessageCallback& cb){
         messageCallback_=cb;
     }
-
+    void setWriteCompleteCallback(const WriteCompleteCallback& cb){
+        writeCompleteCallback_=cb;
+    }
     //删除连接回调
     void removeConnection(const TcpConnectionPtr& conn);
     void removeConnectionInLoop(const TcpConnectionPtr& conn);
@@ -62,9 +66,10 @@ private:
     //在TcpConnection的connectEstablished调用
     ConnectionCallback connCallback_;
     MessageCallback messageCallback_;
+    WriteCompleteCallback writeCompleteCallback_;
     AtomicIntegerT<bool> started_;
     int nextConnId_;
-
+    int connectNum=0;
     
 
 };
