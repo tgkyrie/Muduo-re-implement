@@ -8,36 +8,8 @@
 + 实现 class any类代替原有代码中的boost::any类,实现代码中使用了std::enable_if等元编程技术
 + 支持HTTP1.0\1.1,支持GET请求，新增POST请求
 + 新增Json模块，使用LL1文法分析解析Json，使用模板元技术和变参模板实现get和set的多态.
-+ 改用链式数组实现Buffer(待实现)
++ 采用zero copy技术传输文件
 
-## muduo结构梳理
-### TcpServer
-TcpServer拥有一个acceptor和Eventloop线程池，还有一个loop指出当前Server所属loop
-
-构造时，TcpServer设置acceptor处理新链接的回调
-
-新链接到达,acceptor调用回调newConnection,获取一个Eventloop线程池中的loop，将该链接分配给loop
-
-### Acceptor
-acceptor拥有一个loop指针指出所属loop，一个socket对象，一个channel
-
-acceptor构造时创建一个非阻塞socket,并创建一个channel，设置channel的读回调为acceptor::handleRead
-
-acceptor listen,调用listen，然后再调用channel->enableRead,channel->enableRead会调用update更新loop中的channel
-
-### EventLoopThreadPool
-EventLoopThreadPool接口有start(),getNextLoop()
-
-start()创建多个EventLoopThread，并加入到EventLoopThread列表中,getNextLoop()公平的返回一个loop
-
-### Channel
-channel拥有一个所属loop指针,一个文件描述符,关注事件和触发事件
-
-channel属于loop
-
-
-
-### EventLoopThread
 
 ## 主从Reactor模式
 
